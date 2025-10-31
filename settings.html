@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="th">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>⚙️ ตั้งค่าร้าน - Fuji Mobile</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        header {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .logo {
+            width: 90px;
+            height: auto;
+            border-radius: 10px;
+        }
+
+        .card {
+            border-radius: 15px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        footer {
+            margin-top: 60px;
+            padding: 15px;
+            background: #343a40;
+            color: white;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container mt-4">
+
+        <!-- Header -->
+        <header>
+            <img id="shopLogoPreview"
+                src="https://cdn.vectorstock.com/i/1000v/99/91/smartphone-repair-services-gear-up-for-mobile-vector-55249991.avif"
+                alt="logo" class="logo mb-2">
+            <h4>⚙️ ตั้งค่าข้อมูลร้าน</h4>
+            <p class="text-muted">จัดการข้อมูลพื้นฐานของร้านให้ระบบนำไปใช้ในทุกหน้า</p>
+        </header>
+
+        <!-- Back Button -->
+        <div class="text-center mb-4">
+            <a href="index.html" class="btn btn-secondary btn-sm">⬅ กลับหน้าหลัก</a>
+        </div>
+
+        <!-- Settings Form -->
+        <div class="card">
+            <div class="card-body">
+                <h5 class="text-center mb-4">🛠️ ข้อมูลร้าน</h5>
+
+                <form id="shopForm">
+                    <div class="form-group">
+                        <label>📷 โลโก้ร้าน</label>
+                        <input type="file" class="form-control-file" id="shopLogo">
+                    </div>
+
+                    <div class="form-group">
+                        <label>🏪 ชื่อร้าน</label>
+                        <input type="text" class="form-control" id="shopName" placeholder="เช่น Fuji Mobile Shop">
+                    </div>
+
+                    <div class="form-group">
+                        <label>📞 เบอร์โทร</label>
+                        <input type="text" class="form-control" id="shopPhone" placeholder="เช่น 02091940568">
+                    </div>
+
+                    <div class="form-group">
+                        <label>💬 WhatsApp</label>
+                        <input type="text" class="form-control" id="shopWhatsApp" placeholder="เช่น 02098614336">
+                    </div>
+
+                    <div class="form-group">
+                        <label>📍 ที่อยู่ร้าน</label>
+                        <textarea class="form-control" id="shopAddress" rows="2"
+                            placeholder="เช่น บ้านนาไซ เมืองไชยสมบูรณ์ แขวงเวียงจันทน์"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>👨‍💼 ชื่อเจ้าของร้าน</label>
+                        <input type="text" class="form-control" id="shopOwner" placeholder="เช่น นายยงเหลือ วงค์สมบัติ">
+                    </div>
+
+                    <div class="form-group">
+                        <label>👩‍🔧 รายชื่อพนักงาน</label>
+                        <textarea class="form-control" id="shopStaff" rows="2"
+                            placeholder="ใส่ชื่อพนักงาน เช่น บีม, เต้, อาร์ท"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>🧾 ข้อความท้ายใบเสร็จ (Footer)</label>
+                        <textarea class="form-control" id="shopFooter" rows="2"
+                            placeholder="ขอบคุณที่ใช้บริการ Fuji Mobile! ยินดีให้บริการทุกท่านเสมอ ❤️"></textarea>
+                    </div>
+
+                    <div class="text-center">
+                        <button type="button" id="saveShopInfo" class="btn btn-primary btn-lg">💾
+                            บันทึกข้อมูลร้าน</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer>
+            Fuji Mobile © 2025 | ระบบตั้งค่าร้าน<br>
+            พัฒนาโดย Yonglue Tech
+        </footer>
+    </div>
+
+    <script>
+        const formElements = {
+            name: document.getElementById('shopName'),
+            phone: document.getElementById('shopPhone'),
+            whatsapp: document.getElementById('shopWhatsApp'),
+            address: document.getElementById('shopAddress'),
+            owner: document.getElementById('shopOwner'),
+            staff: document.getElementById('shopStaff'),
+            footer: document.getElementById('shopFooter'),
+            logo: document.getElementById('shopLogo'),
+            logoPreview: document.getElementById('shopLogoPreview')
+        };
+
+        // โหลดข้อมูลเดิมจาก localStorage
+        const shopData = JSON.parse(localStorage.getItem('shopInfo')) || {};
+        if (shopData.name) {
+            formElements.name.value = shopData.name;
+            formElements.phone.value = shopData.phone;
+            formElements.whatsapp.value = shopData.whatsapp;
+            formElements.address.value = shopData.address;
+            formElements.owner.value = shopData.owner;
+            formElements.staff.value = shopData.staff;
+            formElements.footer.value = shopData.footer;
+            if (shopData.logo) formElements.logoPreview.src = shopData.logo;
+        }
+
+        // แสดงพรีวิวโลโก้
+        formElements.logo.addEventListener('change', (e) => {
+            const reader = new FileReader();
+            reader.onload = () => {
+                formElements.logoPreview.src = reader.result;
+            };
+            reader.readAsDataURL(e.target.files[0]);
+        });
+
+        // บันทึกข้อมูล
+        document.getElementById('saveShopInfo').addEventListener('click', () => {
+            const newData = {
+                name: formElements.name.value,
+                phone: formElements.phone.value,
+                whatsapp: formElements.whatsapp.value,
+                address: formElements.address.value,
+                owner: formElements.owner.value,
+                staff: formElements.staff.value,
+                footer: formElements.footer.value,
+                logo: formElements.logoPreview.src
+            };
+
+            localStorage.setItem('shopInfo', JSON.stringify(newData));
+            alert('✅ บันทึกข้อมูลร้านเรียบร้อยแล้ว!');
+        });
+    </script>
+</body>
+
+</html>

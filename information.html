@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="th">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>💼 ข้อมูลลูกค้า - Fuji Mobile Shop</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- SheetJS สำหรับ Excel -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+    <style>
+        body {
+            font-family: 'Kanit', 'Noto Sans Lao', sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        header {
+            text-align: center;
+            padding: 20px 0;
+            background-color: #343a40;
+            color: white;
+            margin-bottom: 20px;
+        }
+
+        header img {
+            width: 100px;
+            height: auto;
+            object-fit: contain;
+            margin-bottom: 10px;
+        }
+
+        .table thead th {
+            background-color: #343a40;
+            color: white;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px 0;
+            background-color: #343a40;
+            color: white;
+            margin-top: 40px;
+        }
+
+        .container h4 {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <img src="https://cdn.vectorstock.com/i/1000v/99/91/smartphone-repair-services-gear-up-for-mobile-vector-55249991.avif"
+            alt="Logo">
+        <h2>Fuji Mobile Shop</h2>
+        <small>Tel: 02091940568 | WhatsApp: 02098614336</small><br>
+        <a href="index.html" class="btn btn-light btn-sm mt-2">⬅ กลับหน้าหลัก</a>
+    </header>
+
+    <div class="container">
+        <h4 class="text-center">ตารางข้อมูลลูกค้า</h4>
+
+        <!-- Form เพิ่มลูกค้า -->
+        <form id="addCustomerForm" class="mb-3">
+            <div class="form-row">
+                <div class="col-md-2 mb-2">
+                    <input type="date" id="custDate" class="form-control" placeholder="วันเดือนปี">
+                </div>
+                <div class="col-md-2 mb-2">
+                    <input type="text" id="custName" class="form-control" placeholder="ชื่อลูกค้า">
+                </div>
+                <div class="col-md-2 mb-2">
+                    <input type="text" id="custPhone" class="form-control" placeholder="เบอร์โทร">
+                </div>
+                <div class="col-md-3 mb-2">
+                    <input type="email" id="custEmail" class="form-control" placeholder="อีเมล">
+                </div>
+                <div class="col-md-2 mb-2">
+                    <input type="text" id="custPassword" class="form-control" placeholder="รหัสผ่าน">
+                </div>
+                <div class="col-md-1 mb-2">
+                    <button type="submit" class="btn btn-primary btn-block">เพิ่ม</button>
+                </div>
+            </div>
+        </form>
+
+        <!-- ปุ่มดาวน์โหลด Excel -->
+        <div class="text-right mb-3">
+            <button id="downloadExcel" class="btn btn-success btn-sm">📥 ดาวน์โหลด Excel</button>
+        </div>
+
+        <!-- ตารางลูกค้า -->
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover table-sm text-center">
+                <thead>
+                    <tr>
+                        <th>วันเดือนปี</th>
+                        <th>ชื่อลูกค้า</th>
+                        <th>เบอร์โทร</th>
+                        <th>อีเมล</th>
+                        <th>รหัสผ่าน</th>
+                        <th>จัดการ</th>
+                    </tr>
+                </thead>
+                <tbody id="customerTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <footer>
+        📞 ติดต่อร้าน Fuji Mobile Shop: Tel 02091940568 | WhatsApp 02098614336<br>
+        🛠 ขอบคุณที่ใช้บริการ เราพร้อมให้บริการซ่อมมือถือทุกวัน
+    </footer>
+
+    <script>
+        let customers = JSON.parse(localStorage.getItem('customers')) || [];
+        const customerTableBody = document.getElementById('customerTableBody');
+
+        function saveCustomers() {
+            localStorage.setItem('customers', JSON.stringify(customers));
+        }
+
+        function renderCustomers() {
+            customerTableBody.innerHTML = '';
+            customers.forEach((c, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${c.date}</td>
+                    <td>${c.name}</td>
+                    <td>${c.phone}</td>
+                    <td>${c.email}</td>
+                    <td>${c.password}</td>
+                    <td>
+                        <button class="btn btn-sm btn-warning edit">แก้ไข</button>
+                        <button class="btn btn-sm btn-danger delete">ลบ</button>
+                    </td>`;
+                row.querySelector('.delete').addEventListener('click', () => {
+                    if (confirm('ลบลูกค้ารายนี้?')) {
+                        customers.splice(index, 1);
+                        saveCustomers();
+                        renderCustomers();
+                    }
+                });
+                row.querySelector('.edit').addEventListener('click', () => {
+                    const newDate = prompt('วันเดือนปี', c.date);
+                    const newName = prompt('ชื่อใหม่', c.name);
+                    const newPhone = prompt('เบอร์โทรใหม่', c.phone);
+                    const newEmail = prompt('อีเมลใหม่', c.email);
+                    const newPassword = prompt('รหัสผ่านใหม่', c.password);
+
+                    if (newDate && newName && newPhone && newEmail && newPassword) {
+                        customers[index] = {
+                            date: newDate,
+                            name: newName,
+                            phone: newPhone,
+                            email: newEmail,
+                            password: newPassword
+                        };
+                        saveCustomers();
+                        renderCustomers();
+                    }
+                });
+                customerTableBody.appendChild(row);
+            });
+        }
+
+        document.getElementById('addCustomerForm').addEventListener('submit', e => {
+            e.preventDefault();
+            const date = document.getElementById('custDate').value;
+            const name = document.getElementById('custName').value.trim();
+            const phone = document.getElementById('custPhone').value.trim();
+            const email = document.getElementById('custEmail').value.trim();
+            const password = document.getElementById('custPassword').value.trim();
+
+            if (!date || !name || !phone || !email || !password) return alert('กรอกข้อมูลให้ครบ');
+
+            customers.push({ date, name, phone, email, password });
+            saveCustomers();
+            renderCustomers();
+
+            // เคลียร์ฟอร์ม
+            document.getElementById('custDate').value = '';
+            document.getElementById('custName').value = '';
+            document.getElementById('custPhone').value = '';
+            document.getElementById('custEmail').value = '';
+            document.getElementById('custPassword').value = '';
+        });
+
+        // ดาวน์โหลด Excel
+        document.getElementById('downloadExcel').addEventListener('click', () => {
+            const wb = XLSX.utils.book_new();
+            const data = [['วันเดือนปี', 'ชื่อลูกค้า', 'เบอร์โทร', 'อีเมล', 'รหัสผ่าน']];
+            customers.forEach(c => data.push([c.date, c.name, c.phone, c.email, c.password]));
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(data), 'Customers');
+            XLSX.writeFile(wb, 'FujiMobile_Customers.xlsx');
+        });
+
+        renderCustomers();
+    </script>
+</body>
+
+</html>

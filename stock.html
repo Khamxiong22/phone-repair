@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="th">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>📦 สต็อกสินค้า - Fuji Mobile Shop</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+
+<body>
+    <div class="container pt-3">
+
+        <!-- Header -->
+        <header class="text-center mb-4">
+            <img src="https://cdn.vectorstock.com/i/1000v/99/91/smartphone-repair-services-gear-up-for-mobile-vector-55249991.avif"
+                alt="logo" class="logo mb-2" style="width:100px; height:auto; object-fit:contain;">
+            <h4 class="mb-0">Fuji Mobile Shop</h4>
+            <small>ເບີໂທລະສັບ: 02091940568 | Whatsapp: 02098614336</small>
+        </header>
+
+        <div class="text-center mb-3">
+            <a href="index.html" class="btn btn-secondary btn-sm">⬅ ກັບໄປຫນ້າທຳອິດ</a>
+        </div>
+
+        <h5 class="text-center mb-3">📦 ລາຍການສະຕອກສິນຄ້າ</h5>
+
+        <!-- Add Form -->
+        <form id="addProductForm" class="mb-3">
+            <div class="form-row">
+                <!-- ✅ เพิ่มช่อง Barcode -->
+                <div class="form-group col-md-2">
+                    <input type="text" id="barcode" class="form-control" placeholder="Barcode" required>
+                </div>
+                <div class="form-group col-md-3">
+                    <input type="text" id="name" class="form-control" placeholder="ຊື່ສິນຄ້າ" required>
+                </div>
+                <div class="form-group col-md-2">
+                    <input type="number" id="qty" class="form-control" placeholder="ຈຳນວນ" min="0" required>
+                </div>
+                <div class="form-group col-md-2">
+                    <input type="number" id="buy" class="form-control" placeholder="ລາຄາຊື້/ຊິ້ນ" step="0.01" min="0"
+                        required>
+                </div>
+                <div class="form-group col-md-2">
+                    <input type="number" id="sell" class="form-control" placeholder="ລາຄາຂາຍ/ຊິ້ນ" step="0.01" min="0"
+                        required>
+                </div>
+                <div class="form-group col-md-1">
+                    <button type="submit" class="btn btn-primary btn-block">ເພິ່ມ</button>
+                </div>
+            </div>
+        </form>
+
+        <!-- Search -->
+        <div class="form-row mb-2">
+            <div class="col-md-6">
+                <input type="text" id="searchInput" class="form-control" placeholder="ค้นหาชื่อสินค้า หรือ Barcode">
+            </div>
+            <div class="col-md-6 text-right">
+                <button class="btn btn-sm btn-info sort-name">ຊື່ A→Z</button>
+                <button class="btn btn-sm btn-info sort-qty-asc">ຈຳນວນ ↑</button>
+                <button class="btn btn-sm btn-info sort-qty-desc">ຈຳນວນ ↓</button>
+            </div>
+        </div>
+
+        <!-- Table -->
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover table-sm">
+                <thead class="thead-dark text-center">
+                    <tr>
+                        <th>Barcode</th> <!-- ✅ เพิ่มคอลัมน์ -->
+                        <th>ຊື່ສິນຄ້າ</th>
+                        <th>ຈຳນວນ</th>
+                        <th>ລາຄາຊື້/ອັນ</th>
+                        <th>ລາຄາຂາຍ/ອັນ</th>
+                        <th>ກຳໄລ/ອັນ</th>
+                        <th>ຈັດການ</th>
+                    </tr>
+                </thead>
+                <tbody id="stockTableBody" class="text-center"></tbody>
+                <tfoot class="font-weight-bold text-center bg-light">
+                    <tr>
+                        <td colspan="3">ລວມລາຄາທັ້ງຫມົດ</td>
+                        <td id="totalBuy">0.00</td>
+                        <td id="totalSell">0.00</td>
+                        <td id="totalProfit">0.00</td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <footer class="mt-4 small text-center">
+            Fuji Mobile Shop | เบอร์โทร: 02091940568 | Whatsapp: 02098614336<br>
+            พนักงานซ่อม: Venkhamxiong Yonglue
+        </footer>
+    </div>
+
+    <!-- JS -->
+    <script>
+        let stock = JSON.parse(localStorage.getItem('stock')) || [];
+
+        const tableBody = document.getElementById('stockTableBody');
+        const form = document.getElementById('addProductForm');
+
+        function saveStock() {
+            localStorage.setItem('stock', JSON.stringify(stock));
+        }
+
+        function renderStock(list) {
+            tableBody.innerHTML = '';
+            let totalBuy = 0, totalSell = 0, totalProfit = 0;
+
+            list.forEach((item, index) => {
+                const profitPerItem = item.sell - item.buy;
+                const totalBuyItem = item.buy * item.qty;
+                const totalSellItem = item.sell * item.qty;
+                const totalProfitItem = profitPerItem * item.qty;
+
+                totalBuy += totalBuyItem;
+                totalSell += totalSellItem;
+                totalProfit += totalProfitItem;
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+          <td>${item.barcode}</td>
+          <td>${item.name}</td>
+          <td>${item.qty}</td>
+          <td>${item.buy.toFixed(2)}</td>
+          <td>${item.sell.toFixed(2)}</td>
+          <td>${profitPerItem.toFixed(2)}</td>
+          <td>
+            <button class="btn btn-sm btn-warning edit">แก้ไข</button>
+            <button class="btn btn-sm btn-danger delete">ลบ</button>
+          </td>
+        `;
+
+                // Delete
+                row.querySelector('.delete').addEventListener('click', () => {
+                    if (confirm('ลบรายการนี้?')) {
+                        stock.splice(index, 1);
+                        saveStock();
+                        renderStock(stock);
+                    }
+                });
+
+                // Edit
+                row.querySelector('.edit').addEventListener('click', () => {
+                    const newBarcode = prompt('Barcode ใหม่', item.barcode);
+                    const newQty = prompt('จำนวนใหม่', item.qty);
+                    const newBuy = prompt('ราคาซื้อใหม่', item.buy);
+                    const newSell = prompt('ราคาขายใหม่', item.sell);
+                    if (newBarcode !== null && newQty !== null && newBuy !== null && newSell !== null) {
+                        item.barcode = newBarcode.trim();
+                        item.qty = parseInt(newQty);
+                        item.buy = parseFloat(newBuy);
+                        item.sell = parseFloat(newSell);
+                        saveStock();
+                        renderStock(stock);
+                    }
+                });
+
+                tableBody.appendChild(row);
+            });
+
+            document.getElementById('totalBuy').textContent = totalBuy.toFixed(2);
+            document.getElementById('totalSell').textContent = totalSell.toFixed(2);
+            document.getElementById('totalProfit').textContent = totalProfit.toFixed(2);
+        }
+
+        // Add Product
+        form.addEventListener('submit', e => {
+            e.preventDefault();
+            const barcode = document.getElementById('barcode').value.trim();
+            const name = document.getElementById('name').value.trim();
+            const qty = parseInt(document.getElementById('qty').value) || 0;
+            const buy = parseFloat(document.getElementById('buy').value) || 0;
+            const sell = parseFloat(document.getElementById('sell').value) || 0;
+
+            stock.push({ barcode, name, qty, buy, sell });
+            saveStock();
+            renderStock(stock);
+            form.reset();
+        });
+
+        // Search
+        document.getElementById('searchInput').addEventListener('input', e => {
+            const val = e.target.value.toLowerCase();
+            renderStock(stock.filter(item =>
+                item.name.toLowerCase().includes(val) ||
+                item.barcode.toLowerCase().includes(val)
+            ));
+        });
+
+        // Sort
+        document.querySelector('.sort-name').addEventListener('click', () => {
+            renderStock([...stock].sort((a, b) => a.name.localeCompare(b.name)));
+        });
+        document.querySelector('.sort-qty-asc').addEventListener('click', () => {
+            renderStock([...stock].sort((a, b) => a.qty - b.qty));
+        });
+        document.querySelector('.sort-qty-desc').addEventListener('click', () => {
+            renderStock([...stock].sort((a, b) => b.qty - a.qty));
+        });
+
+        // Initial Render
+        renderStock(stock);
+    </script>
+</body>
+
+</html>

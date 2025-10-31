@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="th">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>💹 สรุปยอด / กราฟรายเดือน - Fuji Mobile</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        header {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .logo {
+            width: 90px;
+            height: auto;
+            margin-bottom: 10px;
+            border-radius: 10px;
+        }
+
+        footer {
+            margin-top: 60px;
+            padding: 15px;
+            background: #343a40;
+            color: white;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .card {
+            border-radius: 15px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container mt-4">
+
+        <!-- Header -->
+        <header>
+            <img src="https://cdn.vectorstock.com/i/1000v/99/91/smartphone-repair-services-gear-up-for-mobile-vector-55249991.avif"
+                alt="logo" class="logo">
+            <h4>Fuji Mobile Shop</h4>
+            <p class="text-muted">📞 02091940568 | WhatsApp: 02098614336</p>
+        </header>
+
+        <!-- Navbar -->
+        <div class="text-center mb-4">
+            <a href="index.html" class="btn btn-secondary btn-sm">⬅ กลับหน้าหลัก</a>
+            <a href="settings.html" class="btn btn-info btn-sm ml-2">⚙️ ตั้งค่าร้าน</a>
+        </div>
+
+        <!-- Summary Section -->
+        <div class="card mb-4">
+            <div class="card-body text-center">
+                <h5>💰 สรุปยอดขายและกำไรในแต่ละเดือน</h5>
+                <canvas id="salesChart" height="100"></canvas>
+            </div>
+        </div>
+
+        <!-- Repair Stats -->
+        <div class="card mb-4">
+            <div class="card-body text-center">
+                <h5>📱 งานซ่อมยอดนิยม</h5>
+                <canvas id="repairChart" height="100"></canvas>
+            </div>
+        </div>
+
+        <!-- Table Summary -->
+        <div class="card">
+            <div class="card-body">
+                <h5 class="text-center mb-3">📋 ข้อมูลสรุปยอดขาย</h5>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-sm text-center">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>เดือน</th>
+                                <th>เป้าหมาย</th>
+                                <th>ยอดขาย</th>
+                                <th>กำไร</th>
+                            </tr>
+                        </thead>
+                        <tbody id="summaryTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            Fuji Mobile Shop © 2025 | ระบบสรุปยอดขายอัตโนมัติ<br>
+            พัฒนาโดย Yonglue Tech
+        </footer>
+    </div>
+
+    <script>
+        // โหลดข้อมูล
+        const summary = JSON.parse(localStorage.getItem('summary')) || [];
+        const repairs = JSON.parse(localStorage.getItem('repairs')) || [];
+        const stock = JSON.parse(localStorage.getItem('stock')) || [];
+
+        const summaryTableBody = document.getElementById("summaryTableBody");
+
+        // แสดงตารางสรุป
+        summary.forEach((item, i) => {
+            const profit = item.sales - item.target;
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td>เดือน ${i + 1}</td>
+                <td>${item.target.toLocaleString()}</td>
+                <td>${item.sales.toLocaleString()}</td>
+                <td class="${profit >= 0 ? 'text-success' : 'text-danger'}">${profit.toLocaleString()}</td>
+            `;
+            summaryTableBody.appendChild(tr);
+        });
+
+        // กราฟยอดขาย
+        const ctx = document.getElementById('salesChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: summary.map((_, i) => `เดือน ${i + 1}`),
+                datasets: [
+                    {
+                        label: 'ยอดขาย',
+                        data: summary.map(s => s.sales),
+                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    },
+                    {
+                        label: 'เป้าหมาย',
+                        data: summary.map(s => s.target),
+                        backgroundColor: 'rgba(255, 99, 132, 0.6)',
+                    },
+                    {
+                        label: 'กำไร',
+                        data: summary.map(s => s.sales - s.target),
+                        backgroundColor: 'rgba(40, 167, 69, 0.6)',
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+
+        // กราฟวงกลม - ประเภทงานซ่อมยอดนิยม
+        const repairCounts = {};
+        repairs.forEach(r => {
+            if (!repairCounts[r.problem]) repairCounts[r.problem] = 0;
+            repairCounts[r.problem]++;
+        });
+
+        const ctx2 = document.getElementById('repairChart').getContext('2d');
+        new Chart(ctx2, {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(repairCounts),
+                datasets: [{
+                    data: Object.values(repairCounts),
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.6)',
+                        'rgba(54, 162, 235, 0.6)',
+                        'rgba(255, 206, 86, 0.6)',
+                        'rgba(75, 192, 192, 0.6)',
+                        'rgba(153, 102, 255, 0.6)'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>
